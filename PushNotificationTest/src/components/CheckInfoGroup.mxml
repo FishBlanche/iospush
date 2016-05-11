@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:s="library://ns.adobe.com/flex/spark" horizontalCenter="0" width="620" height="600" >
+		<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		@font-face  
+		{  
+			src:url("assets/siyuan.otf");  
+			fontFamily: siyuanFont;  
+			embedAsCFF:true;
+		}  
+	</fx:Style>
+	<fx:Declarations>
+		
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+ 
+			
+			import skins.ListHeaderButtonSkin;
+		 
+			import mx.core.FlexGlobals;
+		]]>
+	</fx:Script>
+ 
+	<s:SkinnableContainer top="0" left="0" right="0"   height="50">
+		<s:layout>
+			<s:HorizontalLayout paddingLeft="0" paddingRight="0" paddingTop="0" gap="-1"/>
+		</s:layout>
+		<s:Button fontSize="26" label="教师" width="25%" height="50" skinClass="skins.ListHeaderButtonSkin" fontWeight="normal"/>
+		<s:Button fontSize="26" label="课程" width="45%" height="50" skinClass="skins.ListHeaderButtonSkin" fontWeight="normal"/>
+		<s:Button fontSize="26" label="签到" width="15%" height="50" skinClass="skins.ListHeaderButtonSkin" fontWeight="normal"/>
+		<s:Button fontSize="26" label="时间" width="25%" height="50" skinClass="skins.ListHeaderButtonSkin" fontWeight="normal"/>
+	</s:SkinnableContainer>
+	 
+	
+	<s:List width="620" contentBackgroundAlpha="0.2" contentBackgroundColor="0xBBFFFF"  horizontalScrollPolicy="off"   id="list"    borderVisible="false" 
+			 top="50" left="0" right="0" bottom="0"
+			 dataProvider="{FlexGlobals.topLevelApplication.newestSensingList}">
+		<s:itemRenderer>
+			<fx:Component>
+				<s:DataRenderer>
+					<s:Rect left="0" right="0" top="0" bottom="0">
+						<s:fill>
+							<s:SolidColor color="haloBlue"
+										  alpha="0"   />
+						</s:fill>
+					</s:Rect>
+				<s:VGroup>
+					<s:HGroup verticalAlign="middle" width="620" height="90">
+						<s:Label fontSize="26" width="25%" text="{data.teacherName}"  textAlign="center" fontFamily="siyuanFont" color="0xffffff"/>
+						<s:Label fontSize="26" width="45%" text="{data.subjectName}" textAlign="center" fontFamily="siyuanFont" color="0xffffff"/>
+						<s:Label fontSize="26" width="15%" text="{data.ischeck}" textAlign="center" fontFamily="siyuanFont" color="0xffffff"/>
+						<s:Label fontSize="26" width="25%" text="{data.checkTime}" textAlign="center" fontFamily="siyuanFont" color="0xffffff"/>
+					</s:HGroup>
+					<s:Line xFrom="0" xTo="620"  >
+						 
+						<s:stroke>
+							<s:SolidColorStroke color="0xBBFFFF" alpha="0.6" weight="0.3" caps="square"/>
+						</s:stroke>
+					</s:Line>
+				</s:VGroup>
+				
+				</s:DataRenderer>
+				
+			</fx:Component>
+			
+		</s:itemRenderer>
+		</s:List>
+</s:Group>
+

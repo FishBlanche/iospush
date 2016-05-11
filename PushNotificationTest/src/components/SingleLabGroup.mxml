@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:s="library://ns.adobe.com/flex/spark" horizontalCenter="0" width="606" height="126" >
+		<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+			@font-face  
+			{  
+				src:url("assets/siyuan.otf");  
+				fontFamily: siyuanFont;  
+				embedAsCFF:true;
+			}  
+	</fx:Style>
+	<fx:Script>
+		<![CDATA[
+			 
+		]]>
+	</fx:Script>
+	<s:Image id="imgUS"  visible="true" includeInLayout="true" source="assets/normalIcon.png"  width="606" height="126" scaleMode="stretch" />
+	<s:Image id="imgS"  visible="false" includeInLayout="false" source="assets/selectedIcon.png"  width="606" height="126" scaleMode="stretch" />
+	
+		<s:Image x="20"  verticalCenter="0" id="icon"  visible="true" source="assets/atom.png"    scaleMode="stretch" />
+		<s:Label x="100" width="500" height="126" verticalAlign="middle" verticalCenter="0" id="labName"   text="视频监控安防系统" fontSize="35" color="#ffffff"  fontFamily="siyuanFont" />
+ 
+	
+</s:Group>

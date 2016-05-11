@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ViewNavigatorApplication xmlns:fx="http://ns.adobe.com/mxml/2009"  applicationDPI="320"  xmlns:controller="controller.*"   
+							xmlns:s="library://ns.adobe.com/flex/spark" firstView="views.PushNotificationTestView" splashScreenImage="components.MyScreenImageSource" splashScreenMinimumDisplayTime="1500" splashScreenScaleMode="stretch" >
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.collections.ArrayList;
+			public var newestSensingList:ArrayCollection=new ArrayCollection;
+		 
+			
+			 
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<controller:SensingFeed id="feed"/>
+		 
+	</fx:Declarations>
+</s:ViewNavigatorApplication>

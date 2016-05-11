@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:s="library://ns.adobe.com/flex/spark" width="601" height="268" addedToStage="toStage()">
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+	 
+		.myTextInput
+		{
+			borderSkin: Embed(source='assets/textBox.png');
+			color: #ffffff;
+			padding-top:0;
+			padding-left:5;
+			showPromptWhenFocused: false;
+		}
+		.myOkBtnStyle
+		{
+			skin:Embed(source="assets/confirm.png");
+			overSkin:Embed(source="assets/confirm.png");
+			selectedDownSkin:Embed(source="assets/confirm.png");
+			selectedUpSkin:Embed(source="assets/confirm.png");
+			selectedOverSkin:Embed(source="assets/confirm.png");
+			 
+			fontSize:35;
+			textAlign:"center";
+			color:"0xffffff";
+			textRollOverColor:"0xffffff";
+			textSelectedColor:"0xffffff";
+		}
+		 
+	 
+		@font-face  
+		{  
+			src:url("assets/siyuan.otf");  
+			fontFamily: siyuan1Font;  
+			embedAsCFF:false;
+		}  
+		@font-face  
+		{  
+			src:url("assets/siyuan.otf");  
+			fontFamily: siyuanFont;  
+			embedAsCFF:true;
+		}  
+	</fx:Style>
+	<fx:Script>
+		<![CDATA[
+			import flash.utils.clearInterval;
+			import flash.utils.setInterval;
+			
+			import mx.effects.Glow;
+			import mx.utils.StringUtil;
+			
+			import spark.managers.PersistenceManager;
+			var IpReg:RegExp =	/^((25[0-5])|(2[0-4]\d)|(1\d\d)|([1-9]\d)|\d)(\.((25[0-5])|(2[0-4]\d)|(1\d\d)|([1-9]\d)|\d)){3}$|^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$/;
+			var persistencemanager:PersistenceManager=new PersistenceManager();
+			
+			private function toStage():void{
+			//	describtionText.visible=false;
+			 
+				if(persistencemanager.load())
+				{ 
+					if(persistencemanager.getProperty("serverIpAddr"))
+					{
+						ipAddr.text=String(persistencemanager.getProperty("serverIpAddr"));
+					}
+					if(persistencemanager.getProperty("serverPortAddr"))
+					{
+						portAddr.text=String(persistencemanager.getProperty("serverPortAddr"));
+					}
+				}
+			}
+			private function okbtn_Click():void
+			{
+				if((IpReg.test(StringUtil.trim(ipAddr.text)))&&portAddr.text!="")
+				{
+					trace("OK");
+					if(persistencemanager.load())
+					{
+						persistencemanager.setProperty("serverIpAddr",ipAddr.text);
+						persistencemanager.setProperty("serverPortAddr",portAddr.text);
+						persistencemanager.setProperty("serverAddr","http://"+ipAddr.text+":"+portAddr.text+"/inspection/messagebroker/amf");
+						persistencemanager.save();
+					}
+					//describtionText.visible=true;
+				 
+					dispatchEvent(new Event("setting_Complete",true));
+				}
+				else
+				{
+					if(!IpReg.test(StringUtil.trim(ipAddr.text)))
+					{
+						//shake(ipAddr);
+						redWarning(ipAddr);
+					}
+					else
+					{
+						//shake(portAddr);
+						redWarning(portAddr);
+					}
+				}
+			}
+			private function redWarning(wrongImput:TextInput):void
+			{
+				var glow:Glow =new Glow(wrongImput);
+				glow.alphaFrom=0;
+				glow.alphaTo=1;
+				glow.blurXFrom=30;
+				glow.blurYFrom=30;
+				glow.strength=3;
+				glow.color=0xff0000;
+				glow.duration=1200;
+				glow.play(null,true);		
+			}
+			private function shake(dis:TextInput,times:uint = 2,offset:uint = 8,speed:uint = 32):void {  
+				
+				var point:Point = new Point(dis.x,dis.y);  
+				var offsetXYArray:Array = [0,0];  
+				var num:int = 0;  
+				var u:int = setInterval(function():void {  
+					trace("setInterval");
+					offsetXYArray[num%2] = (num++)%4<2 ?0:offset;  
+					if(num>(times*4 + 1)){  
+						clearInterval(u);  
+						num = 0;  
+					}  
+					dis.x = offsetXYArray[0] + point.x;  
+					dis.y = offsetXYArray[1] + point.y;  
+				},speed);  
+			}  
+		]]>
+	</fx:Script>
+	<s:Image source="assets/setWrap.png" width="601" height="268"/>
+	 
+		<s:Label x="30" y="35" fontSize="37" verticalAlign="middle" textAlign="center"  text="IP:" height="45" color="#ffffff" fontFamily="siyuanFont"/>
+		<mx:TextInput x="123" y="30"  width="450"     height="55"  id="ipAddr" color="#ffffff"     styleName="myTextInput" fontSize="35" fontFamily="siyuan1Font"/>
+		<s:Label x="30" y="118" fontSize="37"   verticalAlign="middle"  textAlign="center" text="Port:" height="45" color="#ffffff" fontFamily="siyuanFont"/>
+		<mx:TextInput  x="123"  y="110" width="450"    id="portAddr" height="55" color="#ffffff"     styleName="myTextInput" restrict="0-9"  fontSize="35" fontFamily="siyuan1Font"/>
+		<mx:Button  x="410"  y="190" textAlign="center"  label="确认" fontFamily="siyuan1Font"    styleName="myOkBtnStyle" id="okbtn"    click="okbtn_Click()"  />
+	 
+	<!--s:Label horizontalCenter="0" verticalAlign="middle" textAlign="center"  text="重启应用程序后，该设置有效" height="42" color="#ffffff" fontFamily="微软雅黑" visible="false"  id="describtionText"/-->
+</s:Group>

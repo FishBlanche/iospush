@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:s="library://ns.adobe.com/flex/spark" width="607" height="600" >
+		<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+			.myReturnBtnStyle
+			{
+				skin:Embed(source="assets/return.png");
+				overSkin:Embed(source="assets/return.png");
+				selectedDownSkin:Embed(source="assets/return.png");
+				selectedUpSkin:Embed(source="assets/return.png");
+				selectedOverSkin:Embed(source="assets/return.png");
+				fontFamily:"Verdana";
+				fontSize:35;
+				textAlign:"center";
+				color:"0xffffff";
+				textRollOverColor:"0xffffff";
+				textSelectedColor:"0xffffff";
+			}
+			@font-face  
+			{  
+				src:url("assets/siyuan.otf");  
+				fontFamily: siyuan1Font;  
+				embedAsCFF:false;
+			}  
+	</fx:Style>
+	<fx:Script>
+		<![CDATA[
+		 private function back_Click():void
+		 {
+			 dispatchEvent(new Event("back",true));
+		 }
+		]]>
+	</fx:Script>
+	<s:Image source="assets/labinfoWrap.png" width="607" height="600" scaleMode="stretch"/>
+	<!--mx:Button   x="380"  y="575"  label="返回" fontFamily="siyuan1Font"   styleName="myReturnBtnStyle" id="backbtn"    cacheAsBitmap="true" click="back_Click()"  /-->
+	 
+</s:Group>

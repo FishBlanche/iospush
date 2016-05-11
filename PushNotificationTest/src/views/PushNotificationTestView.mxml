@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:comps="components.*" title="主页视图" actionBarVisible="false" creationComplete="create()">
+	 <fx:Style>
+		 @namespace s "library://ns.adobe.com/flex/spark";
+		 @namespace mx "library://ns.adobe.com/flex/mx";
+		 @font-face  
+		 {  
+			 src:url("assets/MFLangQian_Noncommercial-Bold.otf");  
+			 fontFamily: lanqianFont;  
+			 
+		 }  
+		 @font-face  
+		 {  
+			 src:url("assets/zaozi.otf");  
+			 fontFamily: zaoziFont;  
+			 
+		 }  
+		 .myReturnBtnStyle
+		 {
+			 skin:Embed(source="assets/return.png");
+			 overSkin:Embed(source="assets/return.png");
+			 selectedDownSkin:Embed(source="assets/return.png");
+			 selectedUpSkin:Embed(source="assets/return.png");
+			 selectedOverSkin:Embed(source="assets/return.png");
+			 
+			 fontSize:35;
+			 textAlign:"center";
+			 color:"0xffffff";
+			 textRollOverColor:"0xffffff";
+			 textSelectedColor:"0xffffff";
+		 }
+	 </fx:Style>
+	<s:states>
+		<s:State name="mainviewState"/>
+		<s:State name="settingState"/>
+		<s:State name="labinfoState"/>
+		<s:State name="checkState"/>
+	</s:states>
+	<fx:Declarations>
+		
+		<s:VScrollBar id="vsc" />
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import flash.events.RemoteNotificationEvent;
+			import flash.events.StatusEvent;
+			import flash.notifications.NotificationStyle;
+			import flash.notifications.RemoteNotifier;
+			import flash.notifications.RemoteNotifierSubscribeOptions;
+			
+			import mx.messaging.ChannelSet;
+			import mx.messaging.channels.AMFChannel;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.remoting.RemoteObject;
+			
+			import spark.managers.PersistenceManager;
+			
+			import components.DataPump;
+			import components.SingleLabGroup;
+			
+ 
+			
+			private  var serveraddress:PersistenceManager = new PersistenceManager();
+			private var notiStyles:Vector.<String> = new Vector.<String>;
+			private var preferredStyles:Vector.<String> = new Vector.<String>(); 
+			private var remoteNot:RemoteNotifier = new RemoteNotifier(); 
+			private var subscribeOptions:RemoteNotifierSubscribeOptions = new RemoteNotifierSubscribeOptions(); 
+			
+			private var myAMF:AMFChannel=new AMFChannel();
+			private var channelSet:ChannelSet=new ChannelSet();
+			private var ro:RemoteObject = new RemoteObject();
+			
+			
+			private var myAMF1:AMFChannel=new AMFChannel();
+			private var channelSet1:ChannelSet=new ChannelSet();
+			private var ro1:RemoteObject = new RemoteObject();
+			
+			private var myAMF2:AMFChannel=new AMFChannel();
+			private var channelSet2:ChannelSet=new ChannelSet();
+			private var ro2:RemoteObject = new RemoteObject();
+			
+			private var curLab:SingleLabGroup;
+			
+			private var dp:DataPump;
+			private function create():void
+			{
+				preferredStyles.push(NotificationStyle.ALERT ,NotificationStyle.BADGE,NotificationStyle.SOUND ); 
+				subscribeOptions.notificationStyles= preferredStyles; 
+				if(RemoteNotifier.supportedNotificationStyles.toString() != "") 
+				{     
+					remoteNot.subscribe(subscribeOptions); 
+				} 
+				else{ 
+				 //	message.text="Remote Notifications not supported on this Platform!";
+ 				} 
+				remoteNot.addEventListener(RemoteNotificationEvent.TOKEN,tokenHandler,false,0,true); 
+				remoteNot.addEventListener(RemoteNotificationEvent.NOTIFICATION,notificationHandler,false,0,true); 
+				remoteNot.addEventListener(StatusEvent.STATUS,statusHandler,false,0,true); 
+				
+				sg.addEventListener("setting_Complete",setOkHandle,false,0,true);
+				lg.addEventListener("back",backHandle_LabInfo,false,0,true);
+				
+				if(!dp)
+				{
+					dp=new DataPump;
+				}
+				
+				setRemote();
+			 
+			}
+			private function setRemote():void
+			{
+				  
+				if(serveraddress.load())
+				{
+					if(serveraddress.getProperty("serverAddr"))
+					{
+						myAMF1.url = serveraddress.getProperty("serverAddr") as String;
+						myAMF2.url = serveraddress.getProperty("serverAddr") as String;
+					}
+					else
+					{
+						myAMF1.url="";
+						myAMF2.url="";
+					}
+				}
+				else
+				{
+					myAMF1.url="";
+					myAMF2.url="";
+				}
+				trace("myAMF1.url"+myAMF1.url);
+				channelSet1.addChannel(myAMF1); 
+				ro1.channelSet = channelSet1;
+				ro1.destination = "ControlPadService";
+				ro1.addEventListener(ResultEvent.RESULT,remoteobject1_resultHandler,false,0,true);
+				ro1.addEventListener(FaultEvent.FAULT,faultHandle,false,0,true);
+				
+				channelSet2.addChannel(myAMF2); 
+				ro2.channelSet = channelSet2;
+				ro2.destination = "GetLabInfoService";
+				ro2.addEventListener(ResultEvent.RESULT,remoteobject2_resultHandler,false,0,true);
+				ro2.addEventListener(FaultEvent.FAULT,faultHandle,false,0,true);
+				 
+				 
+			}
+			
+			private function notificationHandler(e:RemoteNotificationEvent):void{ 
+				  //  message.text="notificationHandler";
+					
+				 	for (var x:String in e.data) { 
+					 trace("notificationHandler"+ x + ":  " + e.data[x]);
+				//	 message.text+=e.data[x]+"\n";
+				} 
+			} 
+			private function tokenHandler(e:RemoteNotificationEvent):void 
+			{ 
+				if(serveraddress.load())
+				{
+					if(serveraddress.getProperty("serverAddr"))
+					{
+						myAMF.url = serveraddress.getProperty("serverAddr") as String;
+						
+					}
+					else
+					{
+						myAMF.url="";
+					}
+				}
+				else
+				{
+					myAMF.url="";
+				}
+				channelSet.addChannel(myAMF); 
+				ro.channelSet = channelSet;
+				ro.destination = "PushService";
+			    ro.addEventListener(ResultEvent.RESULT,remoteobject_resultHandler,false,0,true);
+				ro.addEventListener(FaultEvent.FAULT,faultHandle,false,0,true);
+				ro.setDeviceToken(e.tokenId);
+			} 
+			
+			private function statusHandler(e:StatusEvent):void{ 
+				 trace("statusHandler");
+			//	 message.text="notification error!!!";
+			} 
+			private function remoteobject_resultHandler(event:ResultEvent):void
+			{
+				
+			}
+			private function remoteobject1_resultHandler(event:ResultEvent):void
+			{
+				
+			}
+			private function remoteobject2_resultHandler(event:ResultEvent):void
+			{
+				busy.includeInLayout=false;
+				busy.visible=false;
+				
+			// trace("remoteobject2_resultHandler"+event.message.body);
+				for(var e:Object in event.result ){
+					var a:SingleLabGroup=new SingleLabGroup;
+					 a.id = event.result[e].id;
+					 a.labName.text = event.result[e].r_name;
+					 a.addEventListener(MouseEvent.CLICK,changePage,false,0,true);
+				     
+					labCanvas.addElement(a);
+				}
+			}
+			private function faultHandle(e:FaultEvent):void
+			{
+				 trace("faultHandle"+e.fault);
+			}
+			/*
+			private function open_Receive():void
+			{
+				messageOn.includeInLayout=true;
+				messageOn.visible=true;
+				messageOff.includeInLayout=false;
+				messageOff.visible=false;
+				
+				
+				preferredStyles.push(NotificationStyle.ALERT ,NotificationStyle.BADGE,NotificationStyle.SOUND ); 
+				subscribeOptions.notificationStyles= preferredStyles; 
+				if(RemoteNotifier.supportedNotificationStyles.toString() != "") 
+				{     
+					remoteNot.subscribe(subscribeOptions); 
+				} 
+				else{ 
+					message.text="Remote Notifications not supported on this Platform!";
+				} 
+			}
+			private function close_Receive():void
+			{
+				messageOn.includeInLayout=false;
+				messageOn.visible=false;
+				messageOff.includeInLayout=true;
+				messageOff.visible=true;
+				
+				remoteNot.unsubscribe();
+			}*/
+			private function changePage(e:MouseEvent):void
+			{
+		       // var pageNum:uint=int((e.currentTarget as SingleLabGroup).id);
+				if(curLab)
+				{
+					curLab.imgS.includeInLayout=false;
+					curLab.imgS.visible=false;
+					curLab.imgUS.includeInLayout=true;
+					curLab.imgUS.visible=true;
+				}
+				curLab=(e.currentTarget as SingleLabGroup);
+				curLab.imgS.includeInLayout=true;
+				curLab.imgS.visible=true;
+				curLab.imgUS.includeInLayout=false;
+				curLab.imgUS.visible=false;
+				ro1.SetPage((e.currentTarget as SingleLabGroup).id);
+			}
+			private function setOkHandle(e:Event):void
+			{
+				this.currentState="mainviewState";
+			}
+			private function backHandle_LabInfo(e:Event):void
+			{
+				this.currentState="mainviewState";
+				ro1.SetPage("mainview");
+			}
+			private function backHandle(e:Event):void
+			{
+				this.currentState="mainviewState";
+			}
+			private function setHandle():void
+			{
+				this.currentState="settingState";
+				   
+			}
+			private function labViewHandle():void
+			{
+				this.currentState="labinfoState";
+				busy.includeInLayout=true;
+				busy.visible=true;
+				labCanvas.removeAllElements();
+				ro2.getlist();
+			}
+			private function MessageLookHandle():void
+			{
+				this.currentState="checkState";
+			}
+		]]>
+	</fx:Script>
+	<s:Image source="assets/back.png" width="100%" height="100%" scaleMode="stretch"/>
+	<s:Image  horizontalCenter="0" y="89" source="assets/tub.png" width="103" height="113"  />
+	 
+	<s:Label  horizontalCenter="0" y="229" text="苏州市职业大学" fontFamily="zaoziFont" color="#ffffff"   fontSize="39"/>
+	<s:Label  horizontalCenter="0" y="278" text="实践教学巡查管理系统" fontFamily="lanqianFont"  color="#ffffff"  fontSize="44"/>
+	
+	<s:Image  includeIn="mainviewState" horizontalCenter="0" y="422" source="assets/coSet.png" click="setHandle()" />
+	<s:Image  includeIn="mainviewState" horizontalCenter="0"   y="592" source="assets/expeSet.png" click="labViewHandle()" />
+	<s:Image  includeIn="mainviewState" horizontalCenter="0"   y="762" source="assets/messageLook.png" click="MessageLookHandle()" />
+	
+	 <comps:SettingGroup id="sg" includeIn="settingState" itemCreationPolicy="immediate"  horizontalCenter="0" y="380"/>
+	<comps:LabInfoGroup id="lg" horizontalCenter="0" y="340" includeIn="labinfoState" itemCreationPolicy="immediate"/>
+	<comps:CheckInfoGroup id="cg" horizontalCenter="0" y="340" includeIn="checkState" itemCreationPolicy="immediate"/>
+	<mx:Button includeIn="checkState" itemCreationPolicy="immediate"  x="{cg.x+452}"  y="960"  label="返回" fontFamily="siyuan1Font"   styleName="myReturnBtnStyle" id="backbtn"     click="backHandle(null)"  />
+	<mx:Button includeIn="labinfoState" itemCreationPolicy="immediate"  x="{lg.x+452}"  y="960"  label="返回" fontFamily="siyuan1Font"   styleName="myReturnBtnStyle" id="labbackbtn"     click="backHandle_LabInfo(null)"  />
+	<s:BusyIndicator includeIn="labinfoState" id="busy" horizontalCenter="0" y="460" symbolColor="#ffffff" includeInLayout="false" visible="false"/>
+	<s:Scroller  includeIn="labinfoState"   horizontalCenter="0" y="340"    height="600"  itemCreationPolicy="immediate" verticalScrollBar="{vsc}"     horizontalScrollPolicy="off"      id="scrllr"    >
+		
+		<s:VGroup     gap="20"    width="607"  id="labCanvas"  >
+			 
+		</s:VGroup>
+		
+	</s:Scroller>
+	 
+</s:View>
